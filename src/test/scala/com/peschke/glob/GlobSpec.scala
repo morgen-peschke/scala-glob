@@ -14,6 +14,7 @@ class GlobSpec extends WordSpec with Matchers {
     "print an equivalent glob" in {
       TestGlobs.LiteralString.describe shouldBe "literal string"
       TestGlobs.LiteralStringCaseCheck.describe shouldBe "Literal String"
+      TestGlobs.LiteralStringQuoteCheck.describe shouldBe "."
 
       TestGlobs.SingleCharWildCard.describe shouldBe "?"
       TestGlobs.ThreeCharWildCards.describe shouldBe "???"
@@ -27,6 +28,10 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.LiteralBeforeStringWildCard.describe shouldBe "literal*"
       TestGlobs.LiteralAfterStringWildCard.describe shouldBe "*literal"
       TestGlobs.LiteralsSurroundStringWildCard.describe shouldBe "literal*string"
+
+      TestGlobs.SingleSimpleBracket.describe shouldBe "[aBc]"
+      TestGlobs.BracketContainingBracketChars.describe shouldBe "[][]"
+      TestGlobs.LiteralsSurroundBracket.describe shouldBe "literal[_.-]string"
     }
   }
 
@@ -36,6 +41,7 @@ class GlobSpec extends WordSpec with Matchers {
 
       TestGlobs.LiteralString.test("literal string") shouldBe true
       TestGlobs.LiteralStringCaseCheck.test("Literal String") shouldBe true
+      TestGlobs.LiteralStringQuoteCheck.test(".") shouldBe true
 
       TestGlobs.SingleCharWildCard.test("a") shouldBe true
       TestGlobs.SingleCharWildCard.test("A") shouldBe true
@@ -85,6 +91,17 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.LiteralsSurroundStringWildCard.test("literalstring") shouldBe true
       TestGlobs.LiteralsSurroundStringWildCard.test("literal-test-string") shouldBe true
       TestGlobs.LiteralsSurroundStringWildCard.test("literal test string") shouldBe true
+
+      TestGlobs.SingleSimpleBracket.test("a") shouldBe true
+      TestGlobs.SingleSimpleBracket.test("B") shouldBe true
+      TestGlobs.SingleSimpleBracket.test("c") shouldBe true
+
+      TestGlobs.BracketContainingBracketChars.test("[") shouldBe true
+      TestGlobs.BracketContainingBracketChars.test("]") shouldBe true
+
+      TestGlobs.LiteralsSurroundBracket.test("literal_string") shouldBe true
+      TestGlobs.LiteralsSurroundBracket.test("literal.string") shouldBe true
+      TestGlobs.LiteralsSurroundBracket.test("literal-string") shouldBe true
     }
 
     "return false if input does not match the glob" in {
@@ -93,6 +110,8 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.LiteralString.test("") shouldBe false
       TestGlobs.LiteralString.test("not the literal string") shouldBe false
       TestGlobs.LiteralStringCaseCheck.test("literal string") shouldBe false
+      TestGlobs.LiteralStringQuoteCheck.test("a") shouldBe false
+      TestGlobs.LiteralStringQuoteCheck.test(" ") shouldBe false
 
       TestGlobs.SingleCharWildCard.test("") shouldBe false
       TestGlobs.SingleCharWildCard.test("aa") shouldBe false
@@ -121,6 +140,16 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.LiteralsSurroundStringWildCard.test("literal-") shouldBe false
       TestGlobs.LiteralsSurroundStringWildCard.test("literal ") shouldBe false
       TestGlobs.LiteralsSurroundStringWildCard.test("literal.wrong") shouldBe false
+
+      TestGlobs.SingleSimpleBracket.test("A") shouldBe false
+      TestGlobs.SingleSimpleBracket.test("b") shouldBe false
+      TestGlobs.SingleSimpleBracket.test(" ") shouldBe false
+
+      TestGlobs.BracketContainingBracketChars.test("") shouldBe false
+
+      TestGlobs.LiteralsSurroundBracket.test("wrong_string") shouldBe false
+      TestGlobs.LiteralsSurroundBracket.test("literal.wrong") shouldBe false
+      TestGlobs.LiteralsSurroundBracket.test("literal string") shouldBe false
     }
   }
 
@@ -142,10 +171,19 @@ class GlobSpec extends WordSpec with Matchers {
       Glob("literal*") shouldBe Success(TestGlobs.LiteralBeforeStringWildCard)
       Glob("*literal") shouldBe Success(TestGlobs.LiteralAfterStringWildCard)
       Glob("literal*string") shouldBe Success(TestGlobs.LiteralsSurroundStringWildCard)
+
+      Glob("[aBc]") shouldBe Success(TestGlobs.SingleSimpleBracket)
+      Glob("[][]") shouldBe Success(TestGlobs.BracketContainingBracketChars)
+      Glob("literal[_.-]string") shouldBe Success(TestGlobs.LiteralsSurroundBracket)
+      Glob("]string") shouldBe Success(Glob(Literal("]string")))
     }
 
     "a Failure if the syntax is not correct" in {
-      Glob("") shouldBe Failure("glob string was empty")
+      Glob("") shouldBe Failure("""(? | * | characterClass | literal):1:1 ...""""")
+      Glob("[]") shouldBe Failure("""CharsWhile(expecting end bracket):1:3 ...""""")
+      Glob("[") shouldBe Failure("""CharsWhile(expecting end bracket):1:2 ...""""")
+      Glob("prefix[") shouldBe Failure("""CharsWhile(expecting end bracket):1:8 ...""""")
+      Glob("[suffix") shouldBe Failure("""missing ']':1:8 ...""""")
     }
   }
 }
@@ -154,6 +192,7 @@ object GlobSpec {
   object TestGlobs {
     val LiteralString = Glob(Literal("literal string"))
     val LiteralStringCaseCheck = Glob(Literal("Literal String"))
+    val LiteralStringQuoteCheck = Glob(Literal("."))
 
     val SingleCharWildCard = Glob(AnyChar)
     val ThreeCharWildCards = Glob(AnyChar, AnyChar, AnyChar)
@@ -174,6 +213,14 @@ object GlobSpec {
       Glob(
         Literal("literal"),
         AnyString,
+        Literal("string"))
+
+    val SingleSimpleBracket = Glob(Bracket("aBc"))
+    val BracketContainingBracketChars = Glob(Bracket("]["))
+    val LiteralsSurroundBracket =
+      Glob(
+        Literal("literal"),
+        Bracket("_.-"),
         Literal("string"))
   }
 }

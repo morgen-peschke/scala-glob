@@ -3,7 +3,7 @@ package com.peschke.glob
 import com.typesafe.scalalogging.LazyLogging
 import scala.util.matching.Regex
 
-import com.peschke.glob.parsers.{ ChunkParsers, GlobParser }
+import com.peschke.glob.parsers.GlobParser
 
 case class Glob(chunks: Glob.Chunk*) extends LazyLogging {
   assert(chunks.nonEmpty, "Glob must contain at least one chunk")
@@ -35,12 +35,14 @@ object Glob {
       case Literal(text) => text
       case AnyChar => "?"
       case AnyString => "*"
+      case Bracket(body) => "[" + body + "]"
     }
 
     def regex: String = this match {
       case Literal(text) => Regex.quote(text)
       case AnyChar => "."
       case AnyString => ".*"
+      case b @ Bracket(_) => "[" + b.quotedBody + "]"
     }
   }
 
@@ -48,6 +50,13 @@ object Glob {
     case class Literal(text: String) extends Chunk
     case object AnyChar extends Chunk
     case object AnyString extends Chunk
+    case class Bracket(body: String) extends Chunk {
+      def quotedBody = body.flatMap {
+        case ']' => """\]"""
+        case '[' => """\["""
+        case c => c.toString
+      }
+    }
   }
 
   def apply(source: String): GlobParser.Result = GlobParser.parse(source)
