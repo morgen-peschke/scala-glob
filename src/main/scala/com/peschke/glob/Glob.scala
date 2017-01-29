@@ -37,21 +37,17 @@ object Glob {
       case AnyString => "*"
     }
 
-    def regex: String
+    def regex: String = this match {
+      case Literal(text) => Regex.quote(text)
+      case AnyChar => "."
+      case AnyString => ".*"
+    }
   }
 
   object Chunk {
-    case class Literal(text: String) extends Chunk {
-      val regex: String = Regex.quote(text)
-    }
-
-    case object AnyChar extends Chunk {
-      def regex: String = "."
-    }
-
-    case object AnyString extends Chunk {
-      def regex: String = ".*"
-    }
+    case class Literal(text: String) extends Chunk
+    case object AnyChar extends Chunk
+    case object AnyString extends Chunk
   }
 
   def apply(source: String): GlobParser.Result = GlobParser.parse(source)
