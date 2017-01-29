@@ -1,12 +1,16 @@
-package com.peschke.glob.parsers
+package com.peschke.scalaglob
 
 import com.typesafe.scalalogging.LazyLogging
 import fastparse.noApi._
+import fastparse.WhitespaceApi
 
-import com.peschke.glob.Glob
 import Glob.Chunk
 
 object GlobParser extends LazyLogging {
+  val DoNotIgnoreSpaces = WhitespaceApi.Wrapper {
+    // Tells FastParse not to discard whitespace
+    fastparse.all.Pass
+  }
   import DoNotIgnoreSpaces._
 
   sealed trait Result

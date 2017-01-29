@@ -1,9 +1,7 @@
-package com.peschke.glob
+package com.peschke.scalaglob
 
 import com.typesafe.scalalogging.LazyLogging
 import scala.util.matching.Regex
-
-import com.peschke.glob.parsers.GlobParser
 
 case class Glob(chunks: Glob.Chunk*) extends LazyLogging {
   assert(chunks.nonEmpty, "Glob must contain at least one chunk")

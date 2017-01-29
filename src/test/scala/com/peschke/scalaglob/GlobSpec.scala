@@ -1,11 +1,9 @@
-package com.peschke.glob
+package com.peschke.scalaglob
 
-import org.scalacheck.Gen
-import org.scalatest.WordSpec
-import org.scalatest.Matchers
+import org.scalatest.{ Matchers, WordSpec }
 import org.scalatest.matchers.{ Matcher, MatchResult }
 
-import com.peschke.glob.parsers.GlobParser.{ Failure, Success }
+import GlobParser.{ Failure, Success }
 import Glob.Chunk._
 
 class GlobSpec extends WordSpec with Matchers {
