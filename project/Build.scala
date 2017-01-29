@@ -6,7 +6,9 @@ object BuildScalaGlob extends Build {
     "com.lihaoyi" %% "fastparse" % "0.4.1",
     "org.scalatest"  %% "scalatest" % "2.2.2" % "test",
     "org.scalamock"  %% "scalamock-scalatest-support" % "3.2" % "test",
-    "org.scalacheck" %% "scalacheck" % "1.12.5" % "test")
+    "org.scalacheck" %% "scalacheck" % "1.12.5" % "test",
+    "ch.qos.logback" % "logback-classic" % "1.1.7",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0")
 
   val commonSettings = Seq(
     version := "0.0",
