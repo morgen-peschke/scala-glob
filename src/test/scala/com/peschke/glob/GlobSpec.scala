@@ -21,6 +21,12 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.LiteralBeforeCharWildCard.describe shouldBe "literal?"
       TestGlobs.LiteralAfterCharWildCard.describe shouldBe "?literal"
       TestGlobs.LiteralsSurroundCharWildCard.describe shouldBe "literal?string"
+
+      TestGlobs.SingleStringWildCard.describe shouldBe "*"
+
+      TestGlobs.LiteralBeforeStringWildCard.describe shouldBe "literal*"
+      TestGlobs.LiteralAfterStringWildCard.describe shouldBe "*literal"
+      TestGlobs.LiteralsSurroundStringWildCard.describe shouldBe "literal*string"
     }
   }
 
@@ -39,22 +45,46 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.ThreeCharWildCards.test("aaa") shouldBe true
       TestGlobs.ThreeCharWildCards.test("ABC") shouldBe true
       TestGlobs.ThreeCharWildCards.test(" . ") shouldBe true
-      TestGlobs.ThreeCharWildCards.test("???") shouldBe true
 
-      TestGlobs.LiteralBeforeCharWildCard.test("literal ") shouldBe true
       TestGlobs.LiteralBeforeCharWildCard.test("literal-") shouldBe true
-      TestGlobs.LiteralBeforeCharWildCard.test("literal_") shouldBe true
+      TestGlobs.LiteralBeforeCharWildCard.test("literal ") shouldBe true
       TestGlobs.LiteralBeforeCharWildCard.test("literalU") shouldBe true
 
-      TestGlobs.LiteralAfterCharWildCard.test(" literal") shouldBe true
       TestGlobs.LiteralAfterCharWildCard.test("-literal") shouldBe true
-      TestGlobs.LiteralAfterCharWildCard.test("_literal") shouldBe true
+      TestGlobs.LiteralAfterCharWildCard.test(" literal") shouldBe true
       TestGlobs.LiteralAfterCharWildCard.test("Uliteral") shouldBe true
 
-      TestGlobs.LiteralsSurroundCharWildCard.test("literal string") shouldBe true
       TestGlobs.LiteralsSurroundCharWildCard.test("literal-string") shouldBe true
-      TestGlobs.LiteralsSurroundCharWildCard.test("literal_string") shouldBe true
+      TestGlobs.LiteralsSurroundCharWildCard.test("literal string") shouldBe true
       TestGlobs.LiteralsSurroundCharWildCard.test("literalUstring") shouldBe true
+
+      TestGlobs.SingleStringWildCard.test("") shouldBe true
+      TestGlobs.SingleStringWildCard.test("a") shouldBe true
+      TestGlobs.SingleStringWildCard.test("abc") shouldBe true
+      TestGlobs.SingleStringWildCard.test(" a") shouldBe true
+      TestGlobs.SingleStringWildCard.test(" abc") shouldBe true
+      TestGlobs.SingleStringWildCard.test("-abc") shouldBe true
+
+      TestGlobs.LiteralBeforeStringWildCard.test("literal") shouldBe true
+      TestGlobs.LiteralBeforeStringWildCard.test("literal-") shouldBe true
+      TestGlobs.LiteralBeforeStringWildCard.test("literal ") shouldBe true
+      TestGlobs.LiteralBeforeStringWildCard.test("literalU") shouldBe true
+      TestGlobs.LiteralBeforeStringWildCard.test("literal a") shouldBe true
+      TestGlobs.LiteralBeforeStringWildCard.test("literal-a") shouldBe true
+
+      TestGlobs.LiteralAfterStringWildCard.test("literal") shouldBe true
+      TestGlobs.LiteralAfterStringWildCard.test("-literal") shouldBe true
+      TestGlobs.LiteralAfterStringWildCard.test(" literal") shouldBe true
+      TestGlobs.LiteralAfterStringWildCard.test("Uliteral") shouldBe true
+      TestGlobs.LiteralAfterStringWildCard.test("  literal") shouldBe true
+      TestGlobs.LiteralAfterStringWildCard.test("a-literal") shouldBe true
+
+      TestGlobs.LiteralsSurroundStringWildCard.test("literal-string") shouldBe true
+      TestGlobs.LiteralsSurroundStringWildCard.test("literal string") shouldBe true
+      TestGlobs.LiteralsSurroundStringWildCard.test("literalUstring") shouldBe true
+      TestGlobs.LiteralsSurroundStringWildCard.test("literalstring") shouldBe true
+      TestGlobs.LiteralsSurroundStringWildCard.test("literal-test-string") shouldBe true
+      TestGlobs.LiteralsSurroundStringWildCard.test("literal test string") shouldBe true
     }
 
     "return false if input does not match the glob" in {
@@ -73,15 +103,24 @@ class GlobSpec extends WordSpec with Matchers {
 
       TestGlobs.LiteralBeforeCharWildCard.test("literal") shouldBe false
       TestGlobs.LiteralBeforeCharWildCard.test("wrong") shouldBe false
-      TestGlobs.LiteralBeforeCharWildCard.test("literal..") shouldBe false
+      TestGlobs.LiteralBeforeCharWildCard.test("literal  ") shouldBe false
 
       TestGlobs.LiteralAfterCharWildCard.test("literal") shouldBe false
       TestGlobs.LiteralAfterCharWildCard.test(".wrong") shouldBe false
       TestGlobs.LiteralAfterCharWildCard.test(" wrong") shouldBe false
 
-      TestGlobs.LiteralsSurroundCharWildCard.test("literal ") shouldBe false
       TestGlobs.LiteralsSurroundCharWildCard.test("literal-") shouldBe false
+      TestGlobs.LiteralsSurroundCharWildCard.test("literal ") shouldBe false
       TestGlobs.LiteralsSurroundCharWildCard.test("literal.wrong") shouldBe false
+
+      TestGlobs.LiteralBeforeStringWildCard.test("wrong") shouldBe false
+
+      TestGlobs.LiteralAfterStringWildCard.test(".wrong") shouldBe false
+      TestGlobs.LiteralAfterStringWildCard.test(" wrong") shouldBe false
+
+      TestGlobs.LiteralsSurroundStringWildCard.test("literal-") shouldBe false
+      TestGlobs.LiteralsSurroundStringWildCard.test("literal ") shouldBe false
+      TestGlobs.LiteralsSurroundStringWildCard.test("literal.wrong") shouldBe false
     }
   }
 
@@ -96,6 +135,13 @@ class GlobSpec extends WordSpec with Matchers {
       Glob("literal?") shouldBe Success(TestGlobs.LiteralBeforeCharWildCard)
       Glob("?literal") shouldBe Success(TestGlobs.LiteralAfterCharWildCard)
       Glob("literal?string") shouldBe Success(TestGlobs.LiteralsSurroundCharWildCard)
+
+      Glob("*") shouldBe Success(TestGlobs.SingleStringWildCard)
+      Glob("**") shouldBe Success(TestGlobs.SingleStringWildCard)
+
+      Glob("literal*") shouldBe Success(TestGlobs.LiteralBeforeStringWildCard)
+      Glob("*literal") shouldBe Success(TestGlobs.LiteralAfterStringWildCard)
+      Glob("literal*string") shouldBe Success(TestGlobs.LiteralsSurroundStringWildCard)
     }
 
     "a Failure if the syntax is not correct" in {
@@ -118,6 +164,16 @@ object GlobSpec {
       Glob(
         Literal("literal"),
         AnyChar,
+        Literal("string"))
+
+    val SingleStringWildCard = Glob(AnyString)
+
+    val LiteralBeforeStringWildCard = Glob(Literal("literal"), AnyString)
+    val LiteralAfterStringWildCard = Glob(AnyString, Literal("literal"))
+    val LiteralsSurroundStringWildCard =
+      Glob(
+        Literal("literal"),
+        AnyString,
         Literal("string"))
   }
 }

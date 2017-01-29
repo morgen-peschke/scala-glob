@@ -1,30 +1,31 @@
 package com.peschke.glob
 
 import com.typesafe.scalalogging.LazyLogging
-import fastparse.noApi._
+import scala.util.matching.Regex
 
 import com.peschke.glob.parsers.{ ChunkParsers, GlobParser }
 
-case class Glob(parts: Glob.Chunk*) extends LazyLogging {
-  assert(parts.nonEmpty, "Glob must contain at least one chunk")
+case class Glob(chunks: Glob.Chunk*) extends LazyLogging {
+  assert(chunks.nonEmpty, "Glob must contain at least one chunk")
 
-  def describe: String = parts.map(_.describe).mkString
+  def describe: String = chunks.map(_.describe).mkString
 
   def test(input: String)(implicit settings: Glob.Settings): Boolean =
-    parser.parse(input) match {
-      case Parsed.Success(_, _) => true
-      case f @ Parsed.Failure(_, _, _) =>
+    input match {
+      case regex() => true
+      case _ =>
         if (settings.logFailures) {
-          logger.warn(s"""[$describe] "$input" did not match pattern: ${f.msg}""")
+          logger.warn(s"""[$describe] "$input" did not match regex: $regex""")
         }
         false
     }
 
-  val parser: Parser[Unit] = ChunkParsers.buildParserFromChunks(parts)
+  val regex: Regex = chunks.map(_.regex).mkString.r
 }
 
 object Glob {
   case class Settings(logFailures: Boolean = false)
+
   implicit val defaultSettings: Settings = Settings()
 
   sealed trait Chunk {
@@ -33,18 +34,23 @@ object Glob {
     def describe: String = this match {
       case Literal(text) => text
       case AnyChar => "?"
+      case AnyString => "*"
     }
 
-    def parser: Parser[Unit]
+    def regex: String
   }
 
   object Chunk {
     case class Literal(text: String) extends Chunk {
-      val parser: Parser[Unit] = ChunkParsers.literalParser(text)
+      val regex: String = Regex.quote(text)
     }
 
     case object AnyChar extends Chunk {
-      def parser: Parser[Unit] = ChunkParsers.anyCharParser
+      def regex: String = "."
+    }
+
+    case object AnyString extends Chunk {
+      def regex: String = ".*"
     }
   }
 

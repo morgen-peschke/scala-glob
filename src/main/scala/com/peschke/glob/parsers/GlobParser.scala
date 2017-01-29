@@ -29,12 +29,19 @@ object GlobParser extends LazyLogging {
       .opaque("?")
       .map(_ => Chunk.AnyChar)
 
-  private val literalParser: Parser[Chunk] =
-    P(CharsWhile(_ != '?').!)
+  private val stringWildCardParser: Parser[Chunk] =
+    P("*".rep(1))
+      .opaque("*")
+      .map(_ => Chunk.AnyString)
+
+  private val literalParser: Parser[Chunk] = {
+    val isInvalidChar = Set('?', '*')
+    P(CharsWhile(!isInvalidChar(_)).!)
       .opaque("<literal>")
       .map(Chunk.Literal(_))
+  }
 
   private val globParser: Parser[Glob] =
-    P((charWildCardParser | literalParser).rep ~ End)
+    P((charWildCardParser | stringWildCardParser | literalParser).rep ~ End)
       .map(Glob(_:_*))
 }
