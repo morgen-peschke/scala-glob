@@ -32,9 +32,13 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.SingleSimpleBracket.describe shouldBe "[aBc]"
       TestGlobs.BracketContainingBracketChars.describe shouldBe "[][]"
       TestGlobs.LiteralsSurroundBracket.describe shouldBe "literal[_.-]string"
+
       TestGlobs.BracketWithRange.describe shouldBe "[a-b Y-Z]"
       TestGlobs.BracketStartsWithDash.describe shouldBe "[-e]"
       TestGlobs.BracketEndsWithDash.describe shouldBe "[e-]"
+
+      TestGlobs.ComplementedBracket.describe shouldBe "[!aBc]"
+      TestGlobs.BracketWithExclamationPoint.describe shouldBe "[a!b]"
     }
   }
 
@@ -116,6 +120,14 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.BracketStartsWithDash.test("e") shouldBe true
       TestGlobs.BracketEndsWithDash.test("-") shouldBe true
       TestGlobs.BracketEndsWithDash.test("e") shouldBe true
+
+      TestGlobs.ComplementedBracket.test("A") shouldBe true
+      TestGlobs.ComplementedBracket.test("b") shouldBe true
+      TestGlobs.ComplementedBracket.test("d") shouldBe true
+
+      TestGlobs.BracketWithExclamationPoint.test("a") shouldBe true
+      TestGlobs.BracketWithExclamationPoint.test("!") shouldBe true
+      TestGlobs.BracketWithExclamationPoint.test("b") shouldBe true
     }
 
     "return false if input does not match the glob" in {
@@ -175,6 +187,14 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.BracketStartsWithDash.test("E") shouldBe false
       TestGlobs.BracketEndsWithDash.test("a") shouldBe false
       TestGlobs.BracketEndsWithDash.test("E") shouldBe false
+
+      TestGlobs.ComplementedBracket.test("a") shouldBe false
+      TestGlobs.ComplementedBracket.test("B") shouldBe false
+      TestGlobs.ComplementedBracket.test("c") shouldBe false
+
+      TestGlobs.BracketWithExclamationPoint.test("A") shouldBe false
+      TestGlobs.BracketWithExclamationPoint.test(" ") shouldBe false
+      TestGlobs.BracketWithExclamationPoint.test("C") shouldBe false
     }
   }
 
@@ -205,6 +225,9 @@ class GlobSpec extends WordSpec with Matchers {
       Glob("[a-b Y-Z]") shouldBe Success(TestGlobs.BracketWithRange)
       Glob("[-e]") shouldBe Success(TestGlobs.BracketStartsWithDash)
       Glob("[e-]") shouldBe Success(TestGlobs.BracketEndsWithDash)
+
+      Glob("[!aBc]") shouldBe Success(TestGlobs.ComplementedBracket)
+      Glob("[a!b]") shouldBe Success(TestGlobs.BracketWithExclamationPoint)
     }
 
     "a Failure if the syntax is not correct" in {
@@ -255,5 +278,8 @@ object GlobSpec {
     val BracketWithRange = Glob(Bracket("a-b Y-Z"))
     val BracketStartsWithDash = Glob(Bracket("-e"))
     val BracketEndsWithDash = Glob(Bracket("e-"))
+
+    val ComplementedBracket = Glob(Bracket("!aBc"))
+    val BracketWithExclamationPoint = Glob(Bracket("a!b"))
   }
 }

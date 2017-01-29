@@ -51,7 +51,13 @@ object Glob {
     case object AnyChar extends Chunk
     case object AnyString extends Chunk
     case class Bracket(body: String) extends Chunk {
-      def quotedBody = body.flatMap {
+      private[Glob] def quotedBody = body.toList match {
+        case '!' :: str => "^" + Bracket.quote(str.mkString)
+        case _ => Bracket.quote(body)
+      }
+    }
+    object Bracket {
+      def quote(text: String): String = text.flatMap {
         case ']' => """\]"""
         case '[' => """\["""
         case c => c.toString
