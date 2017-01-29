@@ -32,6 +32,9 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.SingleSimpleBracket.describe shouldBe "[aBc]"
       TestGlobs.BracketContainingBracketChars.describe shouldBe "[][]"
       TestGlobs.LiteralsSurroundBracket.describe shouldBe "literal[_.-]string"
+      TestGlobs.BracketWithRange.describe shouldBe "[a-b Y-Z]"
+      TestGlobs.BracketStartsWithDash.describe shouldBe "[-e]"
+      TestGlobs.BracketEndsWithDash.describe shouldBe "[e-]"
     }
   }
 
@@ -102,6 +105,17 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.LiteralsSurroundBracket.test("literal_string") shouldBe true
       TestGlobs.LiteralsSurroundBracket.test("literal.string") shouldBe true
       TestGlobs.LiteralsSurroundBracket.test("literal-string") shouldBe true
+
+      TestGlobs.BracketWithRange.test("a") shouldBe true
+      TestGlobs.BracketWithRange.test("b") shouldBe true
+      TestGlobs.BracketWithRange.test(" ") shouldBe true
+      TestGlobs.BracketWithRange.test("Y") shouldBe true
+      TestGlobs.BracketWithRange.test("Z") shouldBe true
+
+      TestGlobs.BracketStartsWithDash.test("-") shouldBe true
+      TestGlobs.BracketStartsWithDash.test("e") shouldBe true
+      TestGlobs.BracketEndsWithDash.test("-") shouldBe true
+      TestGlobs.BracketEndsWithDash.test("e") shouldBe true
     }
 
     "return false if input does not match the glob" in {
@@ -150,6 +164,17 @@ class GlobSpec extends WordSpec with Matchers {
       TestGlobs.LiteralsSurroundBracket.test("wrong_string") shouldBe false
       TestGlobs.LiteralsSurroundBracket.test("literal.wrong") shouldBe false
       TestGlobs.LiteralsSurroundBracket.test("literal string") shouldBe false
+
+      TestGlobs.BracketWithRange.test("A") shouldBe false
+      TestGlobs.BracketWithRange.test("c") shouldBe false
+      TestGlobs.BracketWithRange.test(".") shouldBe false
+      TestGlobs.BracketWithRange.test("X") shouldBe false
+      TestGlobs.BracketWithRange.test("z") shouldBe false
+
+      TestGlobs.BracketStartsWithDash.test("a") shouldBe false
+      TestGlobs.BracketStartsWithDash.test("E") shouldBe false
+      TestGlobs.BracketEndsWithDash.test("a") shouldBe false
+      TestGlobs.BracketEndsWithDash.test("E") shouldBe false
     }
   }
 
@@ -176,6 +201,10 @@ class GlobSpec extends WordSpec with Matchers {
       Glob("[][]") shouldBe Success(TestGlobs.BracketContainingBracketChars)
       Glob("literal[_.-]string") shouldBe Success(TestGlobs.LiteralsSurroundBracket)
       Glob("]string") shouldBe Success(Glob(Literal("]string")))
+
+      Glob("[a-b Y-Z]") shouldBe Success(TestGlobs.BracketWithRange)
+      Glob("[-e]") shouldBe Success(TestGlobs.BracketStartsWithDash)
+      Glob("[e-]") shouldBe Success(TestGlobs.BracketEndsWithDash)
     }
 
     "a Failure if the syntax is not correct" in {
@@ -222,5 +251,9 @@ object GlobSpec {
         Literal("literal"),
         Bracket("_.-"),
         Literal("string"))
+
+    val BracketWithRange = Glob(Bracket("a-b Y-Z"))
+    val BracketStartsWithDash = Glob(Bracket("-e"))
+    val BracketEndsWithDash = Glob(Bracket("e-"))
   }
 }
