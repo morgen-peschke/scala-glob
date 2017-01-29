@@ -3,12 +3,21 @@ package com.peschke.glob
 import org.scalacheck.Gen
 import org.scalatest.WordSpec
 import org.scalatest.Matchers
+import org.scalatest.matchers.{ Matcher, MatchResult }
 
 import com.peschke.glob.parsers.GlobParser.{ Failure, Success }
 import Glob.Chunk._
 
 class GlobSpec extends WordSpec with Matchers {
   import GlobSpec._
+
+  def matchInput(input: String): Matcher[Glob] = Matcher { glob =>
+    MatchResult(
+      glob.test(input),
+      s"""${glob.describe} did not match "$input" using regex "${glob.regex}"""",
+      s"""${glob.describe} matched "$input" using regex "${glob.regex}""""
+    )
+  }
 
   "Glob.describe" should {
     "print an equivalent glob" in {
@@ -46,155 +55,154 @@ class GlobSpec extends WordSpec with Matchers {
     "return true if input matches the glob" in {
       implicit val settings = Glob.Settings(logFailures = true)
 
-      TestGlobs.LiteralString.test("literal string") shouldBe true
-      TestGlobs.LiteralStringCaseCheck.test("Literal String") shouldBe true
-      TestGlobs.LiteralStringQuoteCheck.test(".") shouldBe true
+      TestGlobs.LiteralString should matchInput("literal string")
+      TestGlobs.LiteralString should matchInput("literal string")
+      TestGlobs.LiteralStringCaseCheck should matchInput("Literal String")
+      TestGlobs.LiteralStringQuoteCheck should matchInput(".")
 
-      TestGlobs.SingleCharWildCard.test("a") shouldBe true
-      TestGlobs.SingleCharWildCard.test("A") shouldBe true
-      TestGlobs.SingleCharWildCard.test(" ") shouldBe true
-      TestGlobs.SingleCharWildCard.test("?") shouldBe true
+      TestGlobs.SingleCharWildCard should matchInput("a")
+      TestGlobs.SingleCharWildCard should matchInput("A")
+      TestGlobs.SingleCharWildCard should matchInput(" ")
+      TestGlobs.SingleCharWildCard should matchInput("?")
 
-      TestGlobs.ThreeCharWildCards.test("aaa") shouldBe true
-      TestGlobs.ThreeCharWildCards.test("ABC") shouldBe true
-      TestGlobs.ThreeCharWildCards.test(" . ") shouldBe true
+      TestGlobs.ThreeCharWildCards should matchInput("aaa")
+      TestGlobs.ThreeCharWildCards should matchInput("ABC")
+      TestGlobs.ThreeCharWildCards should matchInput(" . ")
 
-      TestGlobs.LiteralBeforeCharWildCard.test("literal-") shouldBe true
-      TestGlobs.LiteralBeforeCharWildCard.test("literal ") shouldBe true
-      TestGlobs.LiteralBeforeCharWildCard.test("literalU") shouldBe true
+      TestGlobs.LiteralBeforeCharWildCard should matchInput("literal-")
+      TestGlobs.LiteralBeforeCharWildCard should matchInput("literal ")
+      TestGlobs.LiteralBeforeCharWildCard should matchInput("literalU")
 
-      TestGlobs.LiteralAfterCharWildCard.test("-literal") shouldBe true
-      TestGlobs.LiteralAfterCharWildCard.test(" literal") shouldBe true
-      TestGlobs.LiteralAfterCharWildCard.test("Uliteral") shouldBe true
+      TestGlobs.LiteralAfterCharWildCard should matchInput("-literal")
+      TestGlobs.LiteralAfterCharWildCard should matchInput(" literal")
+      TestGlobs.LiteralAfterCharWildCard should matchInput("Uliteral")
 
-      TestGlobs.LiteralsSurroundCharWildCard.test("literal-string") shouldBe true
-      TestGlobs.LiteralsSurroundCharWildCard.test("literal string") shouldBe true
-      TestGlobs.LiteralsSurroundCharWildCard.test("literalUstring") shouldBe true
+      TestGlobs.LiteralsSurroundCharWildCard should matchInput("literal-string")
+      TestGlobs.LiteralsSurroundCharWildCard should matchInput("literal string")
+      TestGlobs.LiteralsSurroundCharWildCard should matchInput("literalUstring")
 
-      TestGlobs.SingleStringWildCard.test("") shouldBe true
-      TestGlobs.SingleStringWildCard.test("a") shouldBe true
-      TestGlobs.SingleStringWildCard.test("abc") shouldBe true
-      TestGlobs.SingleStringWildCard.test(" a") shouldBe true
-      TestGlobs.SingleStringWildCard.test(" abc") shouldBe true
-      TestGlobs.SingleStringWildCard.test("-abc") shouldBe true
+      TestGlobs.SingleStringWildCard should matchInput("")
+      TestGlobs.SingleStringWildCard should matchInput("a")
+      TestGlobs.SingleStringWildCard should matchInput("abc")
+      TestGlobs.SingleStringWildCard should matchInput(" a")
+      TestGlobs.SingleStringWildCard should matchInput(" abc")
+      TestGlobs.SingleStringWildCard should matchInput("-abc")
 
-      TestGlobs.LiteralBeforeStringWildCard.test("literal") shouldBe true
-      TestGlobs.LiteralBeforeStringWildCard.test("literal-") shouldBe true
-      TestGlobs.LiteralBeforeStringWildCard.test("literal ") shouldBe true
-      TestGlobs.LiteralBeforeStringWildCard.test("literalU") shouldBe true
-      TestGlobs.LiteralBeforeStringWildCard.test("literal a") shouldBe true
-      TestGlobs.LiteralBeforeStringWildCard.test("literal-a") shouldBe true
+      TestGlobs.LiteralBeforeStringWildCard should matchInput("literal")
+      TestGlobs.LiteralBeforeStringWildCard should matchInput("literal-")
+      TestGlobs.LiteralBeforeStringWildCard should matchInput("literal ")
+      TestGlobs.LiteralBeforeStringWildCard should matchInput("literalU")
+      TestGlobs.LiteralBeforeStringWildCard should matchInput("literal a")
+      TestGlobs.LiteralBeforeStringWildCard should matchInput("literal-a")
 
-      TestGlobs.LiteralAfterStringWildCard.test("literal") shouldBe true
-      TestGlobs.LiteralAfterStringWildCard.test("-literal") shouldBe true
-      TestGlobs.LiteralAfterStringWildCard.test(" literal") shouldBe true
-      TestGlobs.LiteralAfterStringWildCard.test("Uliteral") shouldBe true
-      TestGlobs.LiteralAfterStringWildCard.test("  literal") shouldBe true
-      TestGlobs.LiteralAfterStringWildCard.test("a-literal") shouldBe true
+      TestGlobs.LiteralAfterStringWildCard should matchInput("literal")
+      TestGlobs.LiteralAfterStringWildCard should matchInput("-literal")
+      TestGlobs.LiteralAfterStringWildCard should matchInput(" literal")
+      TestGlobs.LiteralAfterStringWildCard should matchInput("Uliteral")
+      TestGlobs.LiteralAfterStringWildCard should matchInput("  literal")
+      TestGlobs.LiteralAfterStringWildCard should matchInput("a-literal")
 
-      TestGlobs.LiteralsSurroundStringWildCard.test("literal-string") shouldBe true
-      TestGlobs.LiteralsSurroundStringWildCard.test("literal string") shouldBe true
-      TestGlobs.LiteralsSurroundStringWildCard.test("literalUstring") shouldBe true
-      TestGlobs.LiteralsSurroundStringWildCard.test("literalstring") shouldBe true
-      TestGlobs.LiteralsSurroundStringWildCard.test("literal-test-string") shouldBe true
-      TestGlobs.LiteralsSurroundStringWildCard.test("literal test string") shouldBe true
+      TestGlobs.LiteralsSurroundStringWildCard should matchInput("literal-string")
+      TestGlobs.LiteralsSurroundStringWildCard should matchInput("literal string")
+      TestGlobs.LiteralsSurroundStringWildCard should matchInput("literalUstring")
+      TestGlobs.LiteralsSurroundStringWildCard should matchInput("literalstring")
+      TestGlobs.LiteralsSurroundStringWildCard should matchInput("literal-test-string")
+      TestGlobs.LiteralsSurroundStringWildCard should matchInput("literal test string")
 
-      TestGlobs.SingleSimpleBracket.test("a") shouldBe true
-      TestGlobs.SingleSimpleBracket.test("B") shouldBe true
-      TestGlobs.SingleSimpleBracket.test("c") shouldBe true
+      TestGlobs.SingleSimpleBracket should matchInput("a")
+      TestGlobs.SingleSimpleBracket should matchInput("B")
+      TestGlobs.SingleSimpleBracket should matchInput("c")
 
-      TestGlobs.BracketContainingBracketChars.test("[") shouldBe true
-      TestGlobs.BracketContainingBracketChars.test("]") shouldBe true
+      TestGlobs.BracketContainingBracketChars should matchInput("[")
+      TestGlobs.BracketContainingBracketChars should matchInput("]")
 
-      TestGlobs.LiteralsSurroundBracket.test("literal_string") shouldBe true
-      TestGlobs.LiteralsSurroundBracket.test("literal.string") shouldBe true
-      TestGlobs.LiteralsSurroundBracket.test("literal-string") shouldBe true
+      TestGlobs.LiteralsSurroundBracket should matchInput("literal_string")
+      TestGlobs.LiteralsSurroundBracket should matchInput("literal.string")
+      TestGlobs.LiteralsSurroundBracket should matchInput("literal-string")
 
-      TestGlobs.BracketWithRange.test("a") shouldBe true
-      TestGlobs.BracketWithRange.test("b") shouldBe true
-      TestGlobs.BracketWithRange.test(" ") shouldBe true
-      TestGlobs.BracketWithRange.test("Y") shouldBe true
-      TestGlobs.BracketWithRange.test("Z") shouldBe true
+      TestGlobs.BracketWithRange should matchInput("a")
+      TestGlobs.BracketWithRange should matchInput("b")
+      TestGlobs.BracketWithRange should matchInput(" ")
+      TestGlobs.BracketWithRange should matchInput("Y")
+      TestGlobs.BracketWithRange should matchInput("Z")
 
-      TestGlobs.BracketStartsWithDash.test("-") shouldBe true
-      TestGlobs.BracketStartsWithDash.test("e") shouldBe true
-      TestGlobs.BracketEndsWithDash.test("-") shouldBe true
-      TestGlobs.BracketEndsWithDash.test("e") shouldBe true
+      TestGlobs.BracketStartsWithDash should matchInput("-")
+      TestGlobs.BracketStartsWithDash should matchInput("e")
+      TestGlobs.BracketEndsWithDash should matchInput("-")
+      TestGlobs.BracketEndsWithDash should matchInput("e")
 
-      TestGlobs.ComplementedBracket.test("A") shouldBe true
-      TestGlobs.ComplementedBracket.test("b") shouldBe true
-      TestGlobs.ComplementedBracket.test("d") shouldBe true
+      TestGlobs.ComplementedBracket should matchInput("A")
+      TestGlobs.ComplementedBracket should matchInput("b")
+      TestGlobs.ComplementedBracket should matchInput("d")
 
-      TestGlobs.BracketWithExclamationPoint.test("a") shouldBe true
-      TestGlobs.BracketWithExclamationPoint.test("!") shouldBe true
-      TestGlobs.BracketWithExclamationPoint.test("b") shouldBe true
+      TestGlobs.BracketWithExclamationPoint should matchInput("a")
+      TestGlobs.BracketWithExclamationPoint should matchInput("!")
+      TestGlobs.BracketWithExclamationPoint should matchInput("b")
     }
 
     "return false if input does not match the glob" in {
-      Glob(Literal("test"), AnyChar)
+      TestGlobs.LiteralString should not(matchInput(""))
+      TestGlobs.LiteralString should not(matchInput("not the literal string"))
+      TestGlobs.LiteralStringCaseCheck should not(matchInput("literal string"))
+      TestGlobs.LiteralStringQuoteCheck should not(matchInput("a"))
+      TestGlobs.LiteralStringQuoteCheck should not(matchInput(" "))
 
-      TestGlobs.LiteralString.test("") shouldBe false
-      TestGlobs.LiteralString.test("not the literal string") shouldBe false
-      TestGlobs.LiteralStringCaseCheck.test("literal string") shouldBe false
-      TestGlobs.LiteralStringQuoteCheck.test("a") shouldBe false
-      TestGlobs.LiteralStringQuoteCheck.test(" ") shouldBe false
+      TestGlobs.SingleCharWildCard should not(matchInput(""))
+      TestGlobs.SingleCharWildCard should not(matchInput("aa"))
 
-      TestGlobs.SingleCharWildCard.test("") shouldBe false
-      TestGlobs.SingleCharWildCard.test("aa") shouldBe false
+      TestGlobs.ThreeCharWildCards should not(matchInput("a"))
+      TestGlobs.ThreeCharWildCards should not(matchInput("ab"))
+      TestGlobs.ThreeCharWildCards should not(matchInput("abcd"))
 
-      TestGlobs.ThreeCharWildCards.test("a") shouldBe false
-      TestGlobs.ThreeCharWildCards.test("ab") shouldBe false
-      TestGlobs.ThreeCharWildCards.test("abcd") shouldBe false
+      TestGlobs.LiteralBeforeCharWildCard should not(matchInput("literal"))
+      TestGlobs.LiteralBeforeCharWildCard should not(matchInput("wrong"))
+      TestGlobs.LiteralBeforeCharWildCard should not(matchInput("literal  "))
 
-      TestGlobs.LiteralBeforeCharWildCard.test("literal") shouldBe false
-      TestGlobs.LiteralBeforeCharWildCard.test("wrong") shouldBe false
-      TestGlobs.LiteralBeforeCharWildCard.test("literal  ") shouldBe false
+      TestGlobs.LiteralAfterCharWildCard should not(matchInput("literal"))
+      TestGlobs.LiteralAfterCharWildCard should not(matchInput(".wrong"))
+      TestGlobs.LiteralAfterCharWildCard should not(matchInput(" wrong"))
 
-      TestGlobs.LiteralAfterCharWildCard.test("literal") shouldBe false
-      TestGlobs.LiteralAfterCharWildCard.test(".wrong") shouldBe false
-      TestGlobs.LiteralAfterCharWildCard.test(" wrong") shouldBe false
+      TestGlobs.LiteralsSurroundCharWildCard should not(matchInput("literal-"))
+      TestGlobs.LiteralsSurroundCharWildCard should not(matchInput("literal "))
+      TestGlobs.LiteralsSurroundCharWildCard should not(matchInput("literal.wrong"))
 
-      TestGlobs.LiteralsSurroundCharWildCard.test("literal-") shouldBe false
-      TestGlobs.LiteralsSurroundCharWildCard.test("literal ") shouldBe false
-      TestGlobs.LiteralsSurroundCharWildCard.test("literal.wrong") shouldBe false
+      TestGlobs.LiteralBeforeStringWildCard should not(matchInput("wrong"))
 
-      TestGlobs.LiteralBeforeStringWildCard.test("wrong") shouldBe false
+      TestGlobs.LiteralAfterStringWildCard should not(matchInput(".wrong"))
+      TestGlobs.LiteralAfterStringWildCard should not(matchInput(" wrong"))
 
-      TestGlobs.LiteralAfterStringWildCard.test(".wrong") shouldBe false
-      TestGlobs.LiteralAfterStringWildCard.test(" wrong") shouldBe false
+      TestGlobs.LiteralsSurroundStringWildCard should not(matchInput("literal-"))
+      TestGlobs.LiteralsSurroundStringWildCard should not(matchInput("literal "))
+      TestGlobs.LiteralsSurroundStringWildCard should not(matchInput("literal.wrong"))
 
-      TestGlobs.LiteralsSurroundStringWildCard.test("literal-") shouldBe false
-      TestGlobs.LiteralsSurroundStringWildCard.test("literal ") shouldBe false
-      TestGlobs.LiteralsSurroundStringWildCard.test("literal.wrong") shouldBe false
+      TestGlobs.SingleSimpleBracket should not(matchInput("A"))
+      TestGlobs.SingleSimpleBracket should not(matchInput("b"))
+      TestGlobs.SingleSimpleBracket should not(matchInput(" "))
 
-      TestGlobs.SingleSimpleBracket.test("A") shouldBe false
-      TestGlobs.SingleSimpleBracket.test("b") shouldBe false
-      TestGlobs.SingleSimpleBracket.test(" ") shouldBe false
+      TestGlobs.BracketContainingBracketChars should not(matchInput(""))
 
-      TestGlobs.BracketContainingBracketChars.test("") shouldBe false
+      TestGlobs.LiteralsSurroundBracket should not(matchInput("wrong_string"))
+      TestGlobs.LiteralsSurroundBracket should not(matchInput("literal.wrong"))
+      TestGlobs.LiteralsSurroundBracket should not(matchInput("literal string"))
 
-      TestGlobs.LiteralsSurroundBracket.test("wrong_string") shouldBe false
-      TestGlobs.LiteralsSurroundBracket.test("literal.wrong") shouldBe false
-      TestGlobs.LiteralsSurroundBracket.test("literal string") shouldBe false
+      TestGlobs.BracketWithRange should not(matchInput("A"))
+      TestGlobs.BracketWithRange should not(matchInput("c"))
+      TestGlobs.BracketWithRange should not(matchInput("."))
+      TestGlobs.BracketWithRange should not(matchInput("X"))
+      TestGlobs.BracketWithRange should not(matchInput("z"))
 
-      TestGlobs.BracketWithRange.test("A") shouldBe false
-      TestGlobs.BracketWithRange.test("c") shouldBe false
-      TestGlobs.BracketWithRange.test(".") shouldBe false
-      TestGlobs.BracketWithRange.test("X") shouldBe false
-      TestGlobs.BracketWithRange.test("z") shouldBe false
+      TestGlobs.BracketStartsWithDash should not(matchInput("a"))
+      TestGlobs.BracketStartsWithDash should not(matchInput("E"))
+      TestGlobs.BracketEndsWithDash should not(matchInput("a"))
+      TestGlobs.BracketEndsWithDash should not(matchInput("E"))
 
-      TestGlobs.BracketStartsWithDash.test("a") shouldBe false
-      TestGlobs.BracketStartsWithDash.test("E") shouldBe false
-      TestGlobs.BracketEndsWithDash.test("a") shouldBe false
-      TestGlobs.BracketEndsWithDash.test("E") shouldBe false
+      TestGlobs.ComplementedBracket should not(matchInput("a"))
+      TestGlobs.ComplementedBracket should not(matchInput("B"))
+      TestGlobs.ComplementedBracket should not(matchInput("c"))
 
-      TestGlobs.ComplementedBracket.test("a") shouldBe false
-      TestGlobs.ComplementedBracket.test("B") shouldBe false
-      TestGlobs.ComplementedBracket.test("c") shouldBe false
-
-      TestGlobs.BracketWithExclamationPoint.test("A") shouldBe false
-      TestGlobs.BracketWithExclamationPoint.test(" ") shouldBe false
-      TestGlobs.BracketWithExclamationPoint.test("C") shouldBe false
+      TestGlobs.BracketWithExclamationPoint should not(matchInput("A"))
+      TestGlobs.BracketWithExclamationPoint should not(matchInput(" "))
+      TestGlobs.BracketWithExclamationPoint should not(matchInput("C"))
     }
   }
 
