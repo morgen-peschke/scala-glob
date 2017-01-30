@@ -31,8 +31,8 @@ assert( Glob("") == Failure("""(? | * | characterClass | literal):1:1 ...""""") 
 val Success(reportPages) = Glob("report_[0-9].???")
 ```
 
-Testing input
--------------
+Matching 
+--------
 For simplicity, these examples use the `reportPages` glob defined in the previous example
 ```scala
 assert( reportPages.test("report_0.txt") )
@@ -44,6 +44,16 @@ assert( reportPages.test("report_2.jpg") )
 assert( !reportPages.test("pdf_1.txt") )
 assert( !reportPages.test("report_12.jpg") )
 ```
+
+Configuration
+-------------
+Configuration is handled by the presence of an implicit `Glob.Settings`.
+
+These flags log additional information during failures.
+- `logParseFailures` :: When set to `true`, logs additional information when
+  attempting to parse an invalid glob.
+- `logMatchFailures` :: When set to `true`, logs additional information when
+  a glob cannot expand to match an input
 
 Feature Roadmap
 ===============

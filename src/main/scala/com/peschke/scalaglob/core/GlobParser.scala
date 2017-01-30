@@ -28,8 +28,8 @@ object GlobParser extends LazyLogging {
     globParser.parse(source) match {
       case Parsed.Success(glob, _) => Success(glob)
       case f @ Parsed.Failure(_, _, _) =>
-        if (settings.logFailures) {
-          logger.warn(s"""Unable to parse "$source" to glob: ${f.msg}""")
+        if (settings.logParseFailures) {
+          logger.error(s"""Unable to parse "$source" to glob: ${f.msg}""")
         }
         Failure(f.msg)
     }

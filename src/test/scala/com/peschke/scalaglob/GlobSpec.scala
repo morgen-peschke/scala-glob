@@ -51,7 +51,7 @@ class GlobSpec extends WordSpec with Matchers {
 
   "Glob.test(input)" should {
     "return true if input matches the glob" in {
-      implicit val settings = Glob.Settings(logFailures = true)
+      implicit val settings = Glob.Settings(logMatchFailures = true)
 
       TestGlobs.LiteralString should matchInput("literal string")
       TestGlobs.LiteralString should matchInput("literal string")
@@ -206,6 +206,8 @@ class GlobSpec extends WordSpec with Matchers {
 
   "Glob.apply(source)" should afterWord("parse the source to"){
     "a Success(Glob) if the syntax is correct" in {
+      implicit val settings = Glob.Settings(logParseFailures = true)
+
       Glob("literal string") shouldBe Success(TestGlobs.LiteralString)
       Glob("Literal String") shouldBe Success(TestGlobs.LiteralStringCaseCheck)
 

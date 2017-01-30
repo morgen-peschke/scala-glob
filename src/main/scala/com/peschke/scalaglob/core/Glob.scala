@@ -24,7 +24,7 @@ case class Glob(chunks: Glob.Chunk*) extends LazyLogging {
     input match {
       case regex() => true
       case _ =>
-        if (settings.logFailures) {
+        if (settings.logMatchFailures) {
           logger.warn(s"""[$describe] "$input" did not match regex: $regex""")
         }
         false
@@ -45,7 +45,9 @@ object Glob {
     *
     * Currently only toggles logging failures to parse and match.
     */
-  case class Settings(logFailures: Boolean = false)
+  case class Settings(
+    logParseFailures: Boolean = false,
+    logMatchFailures: Boolean = false)
 
   implicit val defaultSettings: Settings = Settings()
 
