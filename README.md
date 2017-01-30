@@ -79,7 +79,7 @@ POSIX Compatibility
 - [ ] Handle path separators in a glob in a compliant manner
 
 Bash Compatibility ([`extglob`](http://www.linuxjournal.com/content/bash-extended-globbing))
-==================
+--------------------------------------------------------------------------------------------
 - [ ] Optional subgroups (ex: `a?(bc|de)f`)
 - [ ] Optional repeated subgroups (ex: `a*(bc|de)f`)
 - [ ] Required repeated subgroups (ex: `a+(bc|de)f`)
