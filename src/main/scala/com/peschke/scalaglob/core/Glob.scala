@@ -1,4 +1,4 @@
-package com.peschke.scalaglob
+package com.peschke.scalaglob.core
 
 import com.typesafe.scalalogging.LazyLogging
 import scala.util.matching.Regex
@@ -63,5 +63,5 @@ object Glob {
     }
   }
 
-  def apply(source: String): GlobParser.Result = GlobParser.parse(source)
+  def apply(source: String): utils.Result = GlobParser.parse(source)
 }

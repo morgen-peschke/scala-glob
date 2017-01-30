@@ -3,7 +3,7 @@ package com.peschke.scalaglob
 import org.scalatest.{ Matchers, WordSpec }
 import org.scalatest.matchers.{ Matcher, MatchResult }
 
-import GlobParser.{ Failure, Success }
+import com.peschke.scalaglob.api._
 import Glob.Chunk._
 
 class GlobSpec extends WordSpec with Matchers {

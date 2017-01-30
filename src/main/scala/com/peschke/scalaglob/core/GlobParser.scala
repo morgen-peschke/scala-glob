@@ -1,10 +1,11 @@
-package com.peschke.scalaglob
+package com.peschke.scalaglob.core
 
 import com.typesafe.scalalogging.LazyLogging
 import fastparse.noApi._
 import fastparse.WhitespaceApi
 
 import Glob.Chunk
+import utils.{ Failure, Result, Success, Predicate }
 
 object GlobParser extends LazyLogging {
   val DoNotIgnoreSpaces = WhitespaceApi.Wrapper {
@@ -12,10 +13,6 @@ object GlobParser extends LazyLogging {
     fastparse.all.Pass
   }
   import DoNotIgnoreSpaces._
-
-  sealed trait Result
-  case class Success(glob: Glob) extends Result
-  case class Failure(error: String) extends Result
 
   def parse(source: String)(implicit settings: Glob.Settings): Result =
     globParser.parse(source) match {
@@ -26,11 +23,6 @@ object GlobParser extends LazyLogging {
         }
         Failure(f.msg)
     }
-
-  case class Predicate[T](name: String)(f: T => Boolean) extends (T => Boolean){
-    def apply(t: T) = f(t)
-    override def toString() = name
-  }
 
   private val charWildCard: Parser[Chunk] =
     P("?")

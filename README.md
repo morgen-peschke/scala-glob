@@ -17,11 +17,10 @@ Sample Usage
 Imports
 -------
 Unless you're hacking on the primitives (by all means do, and send feedback my
-way), you should generally only need these imports:
+way), you should generally only need one import.
 
 ```scala
-import com.peschke.scalaglob.Glob
-import com.peschke.scalaglob.GlobParser.{ Failure, Success }
+import com.peschke.scalaglob.api._
 ```
 
 Building a Glob
