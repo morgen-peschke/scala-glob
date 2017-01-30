@@ -7,6 +7,9 @@ import fastparse.WhitespaceApi
 import Glob.Chunk
 import utils.{ Failure, Result, Success, Predicate }
 
+/** The primary method is [[GlobParser.parse]], which should mostly be
+  * used by way of [[Glob.apply]]
+  */
 object GlobParser extends LazyLogging {
   val DoNotIgnoreSpaces = WhitespaceApi.Wrapper {
     // Tells FastParse not to discard whitespace
@@ -14,6 +17,13 @@ object GlobParser extends LazyLogging {
   }
   import DoNotIgnoreSpaces._
 
+  /** Attempts to parse a [[String]] into a [[Glob]], wrapped in a [[Result]]
+    *
+    * If [[Glob.Settings.logFailures]] is `true` it will log failures
+    * as warnings, with additional debug information.
+    *
+    * @return [[Success]] if `source` is a valid glob, [[Failure]] otherwise
+    */
   def parse(source: String)(implicit settings: Glob.Settings): Result =
     globParser.parse(source) match {
       case Parsed.Success(glob, _) => Success(glob)

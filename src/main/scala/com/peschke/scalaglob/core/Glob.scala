@@ -6,8 +6,20 @@ import scala.util.matching.Regex
 case class Glob(chunks: Glob.Chunk*) extends LazyLogging {
   assert(chunks.nonEmpty, "Glob must contain at least one chunk")
 
+  /** Return a string which, when passed through [[Glob.apply]],
+    * produces an equivalent [[Glob]]
+    *
+    * @return the glob as a string
+    */
   def describe: String = chunks.map(_.describe).mkString
 
+  /** Return true if the glob would expand to match a file with this name.
+    *
+    * That's the platonic ideal anyway, as implementations in the real
+    * world vary, and [[Glob]] is still pretty raw.
+    *
+    * @return true if the input matches the glob
+    */
   def test(input: String)(implicit settings: Glob.Settings): Boolean =
     input match {
       case regex() => true
@@ -18,14 +30,34 @@ case class Glob(chunks: Glob.Chunk*) extends LazyLogging {
         false
     }
 
+  /** Return a [[Regex]] which matches the same input as this [[Glob]].
+    *
+    * The actual match in [[Glob.test]] uses this [[Regex]], so
+    * exposing it here really helps when debugging.
+    *
+    * @return an equivalent [[Regex]]
+    */
   val regex: Regex = chunks.map(_.regex).mkString.r
 }
 
 object Glob {
+  /** Allows configuring various behaviors.
+    *
+    * Currently only toggles logging failures to parse and match.
+    */
   case class Settings(logFailures: Boolean = false)
 
   implicit val defaultSettings: Settings = Settings()
 
+  /** Parse the string to a [[util.Result]]
+    *
+    * @return [[util.Success]] if `source` is a valid glob, [[util.Failure]] otherwise
+    */
+  def apply(source: String): utils.Result = GlobParser.parse(source)
+
+  /** [[Chunk]] subclasses provide or build [[String]] instances which
+    * will be used to construct the final [[Regex]]
+    */
   sealed trait Chunk {
     import Chunk._
 
@@ -62,6 +94,4 @@ object Glob {
       }
     }
   }
-
-  def apply(source: String): utils.Result = GlobParser.parse(source)
 }
